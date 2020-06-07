@@ -4,11 +4,13 @@ import com.utp.integrador.inventory.inventorymodule.dao.InventoryDao;
 import com.utp.integrador.inventory.inventorymodule.dao.impl.repository.mongodb.InventoryRepository;
 import com.utp.integrador.inventory.inventorymodule.model.entity.ProductEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Qualifier("mongodbProducto")
 public class InventoryDaoImpl implements InventoryDao {
 
     @Autowired
