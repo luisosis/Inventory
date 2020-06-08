@@ -9,11 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class Product {
+public class ProductSupport {
 
     private String codigo;
-    private String nombre;
-    private String categoria;
-    private int stock;
-    private Double precio;
+//    private String nombre;
+    private int cantidadVendida;
 }
