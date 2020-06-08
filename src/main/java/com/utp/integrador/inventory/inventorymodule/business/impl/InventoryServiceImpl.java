@@ -6,6 +6,7 @@ import com.utp.integrador.inventory.inventorymodule.dao.UserDao;
 import com.utp.integrador.inventory.inventorymodule.dao.VentaDao;
 import com.utp.integrador.inventory.inventorymodule.model.api.Product;
 import com.utp.integrador.inventory.inventorymodule.model.api.ProductSupport;
+import com.utp.integrador.inventory.inventorymodule.model.api.ProductsNeedProvider;
 import com.utp.integrador.inventory.inventorymodule.model.api.User;
 import com.utp.integrador.inventory.inventorymodule.model.entity.ProductEntity;
 import com.utp.integrador.inventory.inventorymodule.model.entity.UserEntity;
@@ -153,7 +154,7 @@ public class InventoryServiceImpl implements InventoryService {
                     productSupportAuxiliar = ProductSupport.builder()
                             .codigo(mapCodesAuxiliar.get(j))
                             .cantidadVendida(sumaCantidadAuxiliar)
-//                            .nombre(listaProductosSupport.get(l).getNombre())
+                            .nombre(getName(listaProductos, mapCodesAuxiliar.get(j)))
                             .build();
                     listaProductosSupportAuxiliar.add(productSupportAuxiliar);
                 }
@@ -170,15 +171,97 @@ public class InventoryServiceImpl implements InventoryService {
         return cantidad;
     }
 
-//    private String getName(VentaEntity ventaEntity, List<Product> listaProductos) {
-//        String name = null;
-//        for (Product p : listaProductos) {
-//            System.out.println("afuera : " + p.getNombre());
-//            if (ventaEntity.getCodigo_producto().equals(p.getCodigo())) {
-//                System.out.println("adentro equals : " + p.getNombre());
-//                name = p.getNombre();
-//            }
-//        }
-//        return name;
-//    }
+
+    /**
+     * Obtiene los productos que necesitan ser abastecidos.
+     */
+    @Override
+    public List<ProductsNeedProvider> getProductsProvider() {
+        return parseToApiProvider(ventaDao.getAllVentas());
+    }
+
+    private List<ProductsNeedProvider> parseToApiProvider(List<VentaEntity> entities) {
+
+        List<Product> listaProductos = parse(inventoryDao.getAllProducts());
+
+        String codigosProductos[] = new String[listaProductos.size()];
+        int i = 0;
+        for (Product product : listaProductos) {
+            codigosProductos[i] = product.getCodigo();
+            i++;
+        }
+
+        List<ProductSupport> listaProductosSupport = new ArrayList<>();
+        Set<String> setCodigos = new HashSet<>();
+        ProductSupport productSupport;
+        for (VentaEntity venta : entities) {
+            productSupport = ProductSupport.builder()
+                    .codigo(venta.getCodigo_producto())
+                    .cantidadVendida(showOutputAndInput(venta))
+                    .build();
+            listaProductosSupport.add(productSupport);
+            setCodigos.add(venta.getCodigo_producto());
+        }
+
+        Map<Integer, String> mapCodesAuxiliar = new HashMap<>();
+        int cont = 0;
+        for (String m : setCodigos) {
+            mapCodesAuxiliar.put(cont, m);
+            cont++;
+        }
+
+        /*procesamiento de data*/
+        int sumaCantidadAuxiliar;
+        List<ProductsNeedProvider> listProductsProvider = new ArrayList<>();
+        ProductsNeedProvider needProvider;
+        for (int j = 0; j < mapCodesAuxiliar.size(); j++) {
+            sumaCantidadAuxiliar = 0;
+            for (int l = 0; l < listaProductosSupport.size(); l++) {
+
+                if (mapCodesAuxiliar.get(j).equals(listaProductosSupport.get(l).getCodigo())) {
+                    sumaCantidadAuxiliar = sumaCantidadAuxiliar + listaProductosSupport.get(l).getCantidadVendida();
+                }
+
+                if (l == (listaProductosSupport.size() - 1)) {
+                    needProvider = ProductsNeedProvider.builder()
+                            .codigo(mapCodesAuxiliar.get(j))
+                            .cantidadActual(sumaCantidadAuxiliar)
+                            .stockMinimo(getStockMin(listaProductos, mapCodesAuxiliar.get(j)))
+                            .nombre(getName(listaProductos, mapCodesAuxiliar.get(j)))
+                            .sendAlert(sumaCantidadAuxiliar < getStockMin(listaProductos, mapCodesAuxiliar.get(j)))
+                            .build();
+                    listProductsProvider.add(needProvider);
+                }
+            }
+        }
+        return listProductsProvider;
+    }
+
+    private int showOutputAndInput(VentaEntity ventaEntity) {
+        int cantidad = ventaEntity.getCantidad();
+        if (ventaEntity.getTipo_operacion() == 1) {
+            cantidad = ventaEntity.getCantidad() * (-1);
+        }
+        return cantidad;
+    }
+
+    private int getStockMin(List<Product> listaProductos, String codigo) {
+        int stock = 0;
+        for (Product p : listaProductos) {
+            if (p.getCodigo().equals(codigo)) {
+                stock = p.getStock();
+            }
+        }
+        return stock;
+    }
+
+    private String getName(List<Product> listaProductos, String codigo) {
+        String name = null;
+        for (Product p : listaProductos) {
+            if (p.getCodigo().equals(codigo)) {
+                name = p.getNombre();
+            }
+        }
+        return name;
+    }
 }

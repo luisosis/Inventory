@@ -3,11 +3,11 @@ package com.utp.integrador.inventory.web;
 import com.utp.integrador.inventory.inventorymodule.business.impl.InventoryServiceImpl;
 import com.utp.integrador.inventory.inventorymodule.model.api.Product;
 import com.utp.integrador.inventory.inventorymodule.model.api.ProductSupport;
+import com.utp.integrador.inventory.inventorymodule.model.api.ProductsNeedProvider;
 import com.utp.integrador.inventory.inventorymodule.model.api.User;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,10 +40,11 @@ public class InventoryController {
         return inventoryService.getProductsSales();
     }
 
+    @GetMapping(value = "/products/provider", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE,
+            MediaType.APPLICATION_STREAM_JSON_VALUE})
+    public List<ProductsNeedProvider> getAlert() {
+        return inventoryService.getProductsProvider();
+    }
 
-//    @RequestMapping("/")
-//    public String index(Model model) {
-//        model.addAttribute("list", "prueba");
-//        return "index";
-//    }
+
 }

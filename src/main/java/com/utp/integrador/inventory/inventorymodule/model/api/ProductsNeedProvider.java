@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class ProductSupport {
+public class ProductsNeedProvider {
 
     private String codigo;
+    private int cantidadActual;
+    private int stockMinimo;
     private String nombre;
-    private int cantidadVendida;
+    private Boolean sendAlert;
 }

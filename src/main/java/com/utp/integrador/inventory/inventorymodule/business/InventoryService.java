@@ -2,6 +2,7 @@ package com.utp.integrador.inventory.inventorymodule.business;
 
 import com.utp.integrador.inventory.inventorymodule.model.api.Product;
 import com.utp.integrador.inventory.inventorymodule.model.api.ProductSupport;
+import com.utp.integrador.inventory.inventorymodule.model.api.ProductsNeedProvider;
 import com.utp.integrador.inventory.inventorymodule.model.api.User;
 
 import java.util.List;
@@ -12,4 +13,6 @@ public interface InventoryService {
     User validateUser(User user);
 
     List<ProductSupport> getProductsSales();
+
+    List<ProductsNeedProvider> getProductsProvider();
 }
